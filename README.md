@@ -17,16 +17,22 @@ CodeFolio Pro is a personal portfolio manager designed specifically for develope
 
 ## 📸 Screenshots
 
-*(App screenshots will be added here!)*
-
 <div align="center">
-  <img src="assets/screenshots/home.png" width="200" alt="Home Screen"/>
+  <img src="assets/screenshots/onboarding.png" width="200" alt="Onboarding Screen"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="assets/screenshots/home.png" width="200" alt="Dashboard Screen"/>
   &nbsp;&nbsp;&nbsp;&nbsp;
   <img src="assets/screenshots/projects.png" width="200" alt="Projects Screen"/>
   &nbsp;&nbsp;&nbsp;&nbsp;
   <img src="assets/screenshots/skills.png" width="200" alt="Skills Screen"/>
-  &nbsp;&nbsp;&nbsp;&nbsp;
+  <br/><br/>
   <img src="assets/screenshots/profile.png" width="200" alt="Profile Screen"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="assets/screenshots/project_details.png" width="200" alt="Project Details"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="assets/screenshots/add_project.png" width="200" alt="Add Project"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="assets/screenshots/settings.png" width="200" alt="Settings Screen"/>
 </div>
 
 ## 🚀 Getting Started
