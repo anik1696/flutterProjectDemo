@@ -5,6 +5,7 @@ import '../providers/profile_provider.dart';
 import '../providers/project_provider.dart';
 import '../providers/skill_provider.dart';
 import '../utils/constants.dart';
+import '../app/theme.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -21,9 +22,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initializeApp() async {
-    // Shorter delay for a professional feel
     await Future.delayed(const Duration(milliseconds: 1500));
-
     if (!mounted) return;
 
     await context.read<ThemeProvider>().loadTheme();
@@ -46,22 +45,35 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: cs.surface,
+      backgroundColor: AppTheme.primary,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.layers_rounded, size: 64, color: cs.primary),
-            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.layers_rounded, size: 64, color: AppTheme.primary),
+            ),
+            const SizedBox(height: 32),
             Text(
               'CodeFolio',
               style: tt.headlineMedium?.copyWith(
-                color: cs.onSurface,
-                fontWeight: FontWeight.w700,
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,
               ),
             ),

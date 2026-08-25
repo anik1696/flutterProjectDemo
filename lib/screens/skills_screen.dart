@@ -375,7 +375,7 @@ class _SkillFormSheetState extends State<_SkillFormSheet> {
                 runSpacing: 8,
                 children: kProficiencyLevels.map((level) {
                   final isSelected = _selectedProficiency == level;
-                  final color = AppTheme.proficiencyColor(level, scheme);
+                  final color = AppTheme.proficiencyColor(level);
                   return ChoiceChip(
                     label: Text(level),
                     selected: isSelected,

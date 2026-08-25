@@ -6,10 +6,10 @@ import '../providers/project_provider.dart';
 import '../providers/skill_provider.dart';
 import '../models/user_profile.dart';
 import '../utils/constants.dart';
+import '../app/theme.dart';
 import '../widgets/section_header.dart';
 import 'onboarding_screen.dart';
 
-/// Profile tab — shows the user's developer profile card, stats, and links.
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
@@ -25,28 +25,14 @@ class ProfileScreen extends StatelessWidget {
       final uri = Uri.parse(url);
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not open link')),
-          );
-        }
       }
-    } catch (_) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid URL')),
-        );
-      }
-    }
+    } catch (_) {}
   }
 
   void _editProfile(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => const OnboardingScreen(isEditing: true),
-      ),
+      MaterialPageRoute(builder: (_) => const OnboardingScreen(isEditing: true)),
     );
   }
 
@@ -55,199 +41,173 @@ class ProfileScreen extends StatelessWidget {
     final profile = context.watch<ProfileProvider>().profile;
     final projectProvider = context.watch<ProjectProvider>();
     final skillProvider = context.watch<SkillProvider>();
-    final scheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final tt = Theme.of(context).textTheme;
 
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
-            expandedHeight: 180,
-            pinned: true,
-            backgroundColor: scheme.surface,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.settings_outlined),
-                tooltip: 'Settings',
-                onPressed: () => Navigator.pushNamed(context, kRouteSettings),
-              ),
-              IconButton(
-                icon: const Icon(Icons.edit_outlined),
-                tooltip: 'Edit Profile',
-                onPressed: () => _editProfile(context),
-              ),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              collapseMode: CollapseMode.parallax,
-              background: Container(
-                color: scheme.surface,
-                child: SafeArea(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircleAvatar(
-                        radius: 40,
-                        backgroundColor: scheme.surfaceContainerHighest,
-                        child: Text(
-                          _initials(profile.name),
-                          style: textTheme.headlineSmall?.copyWith(
-                            color: scheme.onSurface,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        profile.name.isNotEmpty ? profile.name : 'Your Name',
-                        style: textTheme.titleMedium?.copyWith(
-                          color: scheme.onSurface,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      if (profile.title.isNotEmpty)
-                        Text(
-                          profile.title,
-                          style: textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          // ── Body content ─────────────────────────────────────────────────
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Bio
-                  if (profile.bio.isNotEmpty) ...[
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SectionHeader(title: 'About'),
-                            const SizedBox(height: 8),
-                            Text(profile.bio, style: textTheme.bodyMedium),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-
-                  // Contact & Links
-                  if (profile.email.isNotEmpty ||
-                      profile.githubUsername.isNotEmpty ||
-                      profile.websiteUrl.isNotEmpty) ...[
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                              child: SectionHeader(title: 'Contact & Links'),
-                            ),
-                            if (profile.email.isNotEmpty)
-                              _buildLinkTile(
-                                context,
-                                Icons.email_outlined,
-                                profile.email,
-                                null,
-                              ),
-                            if (profile.githubUsername.isNotEmpty)
-                              _buildLinkTile(
-                                context,
-                                Icons.code_rounded,
-                                '@${profile.githubUsername}',
-                                profile.githubUrl.isNotEmpty
-                                    ? profile.githubUrl
-                                    : null,
-                              ),
-                            if (profile.websiteUrl.isNotEmpty)
-                              _buildLinkTile(
-                                context,
-                                Icons.language_rounded,
-                                profile.websiteUrl,
-                                profile.websiteUrl,
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-
-                  // Portfolio Stats
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.topCenter,
+              children: [
+                // Vibrant Header Background
+                Container(
+                  height: 200,
+                  width: double.infinity,
+                  color: AppTheme.primary,
+                  child: SafeArea(
+                    child: Align(
+                      alignment: Alignment.topRight,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          SectionHeader(title: 'Portfolio Stats'),
-                          const SizedBox(height: 16),
-                          IntrinsicHeight(
-                            child: Row(
-                              children: [
-                                _buildStat(
-                                  context,
-                                  '${projectProvider.totalProjects}',
-                                  'Projects',
-                                ),
-                                VerticalDivider(
-                                  color: scheme.outlineVariant,
-                                  thickness: 1,
-                                ),
-                                _buildStat(
-                                  context,
-                                  '${projectProvider.completedProjects}',
-                                  'Completed',
-                                ),
-                                VerticalDivider(
-                                  color: scheme.outlineVariant,
-                                  thickness: 1,
-                                ),
-                                _buildStat(
-                                  context,
-                                  '${skillProvider.totalSkills}',
-                                  'Skills',
-                                ),
-                              ],
-                            ),
+                          IconButton(
+                            icon: const Icon(Icons.edit_rounded, color: Colors.white),
+                            onPressed: () => _editProfile(context),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.settings_rounded, color: Colors.white),
+                            onPressed: () => Navigator.pushNamed(context, kRouteSettings),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
-
-                  // Edit profile button
-                  FilledButton.tonal(
-                    onPressed: () => _editProfile(context),
-                    child: const Text('Edit Profile'),
+                ),
+                // Overlapping Profile Info
+                Container(
+                  margin: const EdgeInsets.only(top: 130, left: 24, right: 24),
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: AppTheme.cardColor,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x1A000000),
+                        blurRadius: 20,
+                        offset: Offset(0, 10),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-
-                  // Settings button
-                  OutlinedButton.icon(
-                    onPressed: () =>
-                        Navigator.pushNamed(context, kRouteSettings),
-                    icon: const Icon(Icons.settings_outlined),
-                    label: const Text('Settings'),
+                  child: Column(
+                    children: [
+                      CircleAvatar(
+                        radius: 48,
+                        backgroundColor: AppTheme.primary.withValues(alpha: 0.15),
+                        child: Text(
+                          _initials(profile.name),
+                          style: tt.headlineMedium?.copyWith(
+                            color: AppTheme.primary,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        profile.name.isNotEmpty ? profile.name : 'Your Name',
+                        style: tt.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: AppTheme.textDark,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      if (profile.title.isNotEmpty)
+                        Text(
+                          profile.title,
+                          style: tt.bodyMedium?.copyWith(
+                            color: AppTheme.secondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                if (profile.bio.isNotEmpty) ...[
+                  Text(
+                    'About Me',
+                    style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: AppTheme.textDark),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    profile.bio,
+                    style: tt.bodyMedium?.copyWith(color: AppTheme.textLight, height: 1.5),
                   ),
                   const SizedBox(height: 32),
                 ],
-              ),
+
+                if (profile.email.isNotEmpty || profile.githubUsername.isNotEmpty || profile.websiteUrl.isNotEmpty) ...[
+                  Text(
+                    'Connect',
+                    style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: AppTheme.textDark),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppTheme.cardColor,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x0A000000),
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        if (profile.email.isNotEmpty)
+                          _buildLinkTile(context, Icons.alternate_email_rounded, profile.email, null, tt),
+                        if (profile.githubUsername.isNotEmpty)
+                          _buildLinkTile(context, Icons.code_rounded, '@${profile.githubUsername}', profile.githubUrl, tt),
+                        if (profile.websiteUrl.isNotEmpty)
+                          _buildLinkTile(context, Icons.language_rounded, profile.websiteUrl, profile.websiteUrl, tt),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                ],
+
+                Text(
+                  'Stats Overview',
+                  style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: AppTheme.textDark),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  decoration: BoxDecoration(
+                    color: AppTheme.cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x0A000000),
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildStat('${projectProvider.totalProjects}', 'Projects', tt),
+                      Container(height: 40, width: 1, color: const Color(0xFFE2E8F0)),
+                      _buildStat('${projectProvider.completedProjects}', 'Completed', tt),
+                      Container(height: 40, width: 1, color: const Color(0xFFE2E8F0)),
+                      _buildStat('${skillProvider.totalSkills}', 'Skills', tt),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 40),
+              ]),
             ),
           ),
         ],
@@ -255,45 +215,44 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLinkTile(
-    BuildContext context,
-    IconData icon,
-    String label,
-    String? url,
-  ) {
+  Widget _buildLinkTile(BuildContext context, IconData icon, String label, String? url, TextTheme tt) {
     return ListTile(
-      leading: Icon(icon, size: 20),
-      title: Text(label, style: Theme.of(context).textTheme.bodyMedium),
-      trailing: url != null
-          ? const Icon(Icons.open_in_new_rounded, size: 16)
-          : null,
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppTheme.background,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(icon, size: 20, color: AppTheme.primary),
+      ),
+      title: Text(
+        label,
+        style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: AppTheme.textDark),
+      ),
+      trailing: url != null ? const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppTheme.textLight) : null,
       onTap: url != null ? () => _launchUrl(context, url) : null,
-      dense: true,
     );
   }
 
-  Widget _buildStat(BuildContext context, String value, String label) {
-    final textTheme = Theme.of(context).textTheme;
-    final scheme = Theme.of(context).colorScheme;
-    return Expanded(
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: scheme.primary,
-            ),
+  Widget _buildStat(String value, String label, TextTheme tt) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: tt.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: AppTheme.primary,
           ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: tt.labelMedium?.copyWith(
+            color: AppTheme.textLight,
+            fontWeight: FontWeight.w600,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
