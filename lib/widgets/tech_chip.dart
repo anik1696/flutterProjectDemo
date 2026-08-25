@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../app/theme.dart';
 
 class TechChip extends StatelessWidget {
   final String label;
@@ -18,67 +19,62 @@ class TechChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final isDark = cs.brightness == Brightness.dark;
-
     if (onTap != null) {
-      return FilterChip(
-        label: Text(label),
-        selected: selected,
-        onSelected: (_) => onTap!(),
-        labelStyle: TextStyle(
-          fontSize: 11,
-          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-          color: selected ? cs.primary : cs.onSurfaceVariant,
+      return GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: selected ? AppTheme.primary : AppTheme.cardBg,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: selected ? AppTheme.primary : AppTheme.divider,
+              width: selected ? 0 : 1,
+            ),
+            boxShadow: selected
+                ? null
+                : const [BoxShadow(color: Color(0x0A000000), blurRadius: 4, offset: Offset(0, 1))],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  color: selected ? Colors.white : AppTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
         ),
-        backgroundColor: isDark
-            ? Colors.white.withValues(alpha: 0.06)
-            : cs.surfaceContainerHighest,
-        selectedColor: cs.primary.withValues(alpha: 0.12),
-        side: BorderSide(
-          color: selected
-              ? cs.primary.withValues(alpha: 0.4)
-              : cs.outline.withValues(alpha: 0.2),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       );
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
+        color: AppTheme.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
-        color: selected
-            ? cs.primary.withValues(alpha: 0.12)
-            : isDark
-                ? Colors.white.withValues(alpha: 0.06)
-                : cs.surfaceContainerHighest,
-        border: Border.all(
-          color: selected
-              ? cs.primary.withValues(alpha: 0.3)
-              : isDark
-                  ? Colors.white.withValues(alpha: 0.1)
-                  : cs.outline.withValues(alpha: 0.2),
-        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             label,
-            style: TextStyle(
-              fontSize: 11,
-              color: selected ? cs.primary : cs.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.primary,
             ),
           ),
           if (showClose && onClose != null) ...[
             const SizedBox(width: 4),
             GestureDetector(
               onTap: onClose,
-              child: Icon(Icons.close_rounded,
-                  size: 12, color: cs.onSurfaceVariant),
+              child: const Icon(Icons.close_rounded, size: 12, color: AppTheme.primary),
             ),
           ],
         ],

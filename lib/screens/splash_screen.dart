@@ -22,60 +22,56 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initializeApp() async {
-    await Future.delayed(const Duration(milliseconds: 1500));
+    await Future.delayed(const Duration(milliseconds: 1400));
     if (!mounted) return;
-
     await context.read<ThemeProvider>().loadTheme();
     await context.read<ProfileProvider>().loadProfile();
     await context.read<ProjectProvider>().loadProjects();
     await context.read<SkillProvider>().loadSkills();
-
     if (!mounted) return;
-
-    final profileProvider = context.read<ProfileProvider>();
-    final isProfileSetup = profileProvider.isProfileSetup;
-
+    final isProfileSetup = context.read<ProfileProvider>().isProfileSetup;
     if (!mounted) return;
-
-    Navigator.pushReplacementNamed(
-      context,
-      isProfileSetup ? kRouteMain : kRouteOnboarding,
-    );
+    Navigator.pushReplacementNamed(context, isProfileSetup ? kRouteMain : kRouteOnboarding);
   }
 
   @override
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
-
     return Scaffold(
-      backgroundColor: AppTheme.primary,
+      backgroundColor: AppTheme.scaffoldBg,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(20),
+              width: 90,
+              height: 90,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppTheme.primary,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
+                    color: AppTheme.primary.withValues(alpha: 0.35),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
                   ),
                 ],
               ),
-              child: const Icon(Icons.layers_rounded, size: 64, color: AppTheme.primary),
+              child: const Icon(Icons.layers_rounded, color: Colors.white, size: 48),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
             Text(
               'CodeFolio',
               style: tt.headlineMedium?.copyWith(
-                color: Colors.white,
+                color: AppTheme.textPrimary,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,
               ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Your dev portfolio tracker',
+              style: tt.bodyMedium?.copyWith(color: AppTheme.textSecond),
             ),
           ],
         ),

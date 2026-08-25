@@ -3,105 +3,141 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  // ── Vibrant Professional Palette ─────────────────────────────────────────
-  static const Color primary = Color(0xFF4338CA); // Deep Indigo
-  static const Color secondary = Color(0xFFF43F5E); // Rose
-  static const Color background = Color(0xFFF1F5F9); // Soft Blue-Gray
-  static const Color cardColor = Colors.white;
-  static const Color textDark = Color(0xFF1E293B); // Slate 800
-  static const Color textLight = Color(0xFF64748B); // Slate 500
+  // ── Palette (matches friend's app aesthetic) ───────────────────────────────
+  static const Color scaffoldBg  = Color(0xFFF2F2F7); // iOS-style light gray
+  static const Color cardBg      = Color(0xFFFFFFFF);
+  static const Color primary     = Color(0xFF2E7D32); // Forest Green (accent only)
+  static const Color textPrimary = Color(0xFF1C1C1E); // Near-black
+  static const Color textSecond  = Color(0xFF8E8E93); // Medium gray
+  static const Color divider     = Color(0xFFE5E5EA);
 
   // Semantic
-  static const Color success = Color(0xFF10B981); // Emerald
-  static const Color warning = Color(0xFFF59E0B); // Amber
-  static const Color info = Color(0xFF0EA5E9); // Sky Blue
+  static const Color success  = Color(0xFF34C759); // iOS Green
+  static const Color warning  = Color(0xFFFF9500); // iOS Orange  
+  static const Color danger   = Color(0xFFFF3B30); // iOS Red
+  static const Color info     = Color(0xFF007AFF); // iOS Blue
+  static const Color purple   = Color(0xFF5856D6); // iOS Purple
+
+  // Pastel icon circle backgrounds
+  static const Color iconBgBlue   = Color(0xFFE3F2FD);
+  static const Color iconBgGreen  = Color(0xFFE8F5E9);
+  static const Color iconBgOrange = Color(0xFFFFF3E0);
+  static const Color iconBgRed    = Color(0xFFFFEBEE);
+  static const Color iconBgPurple = Color(0xFFEDE7F6);
+  static const Color iconBgTeal   = Color(0xFFE0F2F1);
+
+  static BoxDecoration get cardDecoration => BoxDecoration(
+    color: cardBg,
+    borderRadius: BorderRadius.circular(16),
+    boxShadow: const [
+      BoxShadow(
+        color: Color(0x0D000000),
+        blurRadius: 8,
+        offset: Offset(0, 2),
+      ),
+    ],
+  );
 
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
       fontFamily: 'Inter',
-      scaffoldBackgroundColor: background,
+      scaffoldBackgroundColor: scaffoldBg,
       colorScheme: const ColorScheme.light(
         primary: primary,
         onPrimary: Colors.white,
-        secondary: secondary,
+        secondary: info,
         onSecondary: Colors.white,
-        surface: background,
-        onSurface: textDark,
-        error: secondary,
+        surface: cardBg,
+        onSurface: textPrimary,
+        error: danger,
+        outline: divider,
+        surfaceContainerHighest: Color(0xFFF2F2F7),
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: primary,
-        foregroundColor: Colors.white,
+        backgroundColor: scaffoldBg,
+        foregroundColor: textPrimary,
         elevation: 0,
-        centerTitle: true,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
         titleTextStyle: TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
+          color: textPrimary,
+          fontSize: 28,
+          fontWeight: FontWeight.w800,
           letterSpacing: -0.5,
         ),
       ),
       cardTheme: CardThemeData(
-        color: cardColor,
-        elevation: 4, // Real shadow for physical depth
-        shadowColor: const Color(0x1A000000), // Soft shadow
+        color: cardBg,
+        elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide.none,
         ),
         margin: EdgeInsets.zero,
       ),
       dividerTheme: const DividerThemeData(
-        color: Color(0xFFE2E8F0),
+        color: divider,
         thickness: 1,
         space: 1,
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: const Color(0xFFEEF2FF), // Light indigo
+        backgroundColor: cardBg,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: BorderSide.none,
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: divider),
         ),
         labelStyle: const TextStyle(
-          color: primary,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
+          color: textPrimary,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: Colors.white,
-        elevation: 16,
-        shadowColor: Colors.black.withValues(alpha: 0.1),
-        indicatorColor: const Color(0xFFEEF2FF),
+        backgroundColor: cardBg,
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        indicatorColor: Colors.transparent,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: primary,
-            );
-          }
-          return const TextStyle(
-            fontSize: 12,
+          final selected = states.contains(WidgetState.selected);
+          return TextStyle(
+            fontSize: 11,
             fontWeight: FontWeight.w600,
-            color: textLight,
+            color: selected ? primary : textSecond,
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return const IconThemeData(color: primary, size: 26);
-          }
-          return const IconThemeData(color: textLight, size: 24);
+          final selected = states.contains(WidgetState.selected);
+          return IconThemeData(
+            color: selected ? primary : textSecond,
+            size: 26,
+          );
         }),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: secondary,
+        backgroundColor: primary,
         foregroundColor: Colors.white,
         elevation: 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(16)),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: cardBg,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: divider),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: divider),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: primary, width: 2),
         ),
       ),
     );
@@ -109,30 +145,49 @@ class AppTheme {
 
   static ThemeData get darkTheme => lightTheme;
 
-  // Colorful Semantic Helpers
+  // ── Semantic helpers ───────────────────────────────────────────────────────
   static Color statusColor(String status) {
     if (status == 'Completed') return success;
     if (status == 'In Progress') return warning;
-    return textLight;
+    if (status == 'Archived') return textSecond;
+    return textSecond;
   }
-  
-  static Color statusBackgroundColor(String status) {
-    if (status == 'Completed') return success.withValues(alpha: 0.15);
-    if (status == 'In Progress') return warning.withValues(alpha: 0.15);
-    return textLight.withValues(alpha: 0.15);
-  }
+
+  static Color statusBg(String status) =>
+      statusColor(status).withValues(alpha: 0.12);
 
   static Color proficiencyColor(String level) {
     switch (level) {
-      case 'Beginner': return info;
+      case 'Beginner':     return info;
       case 'Intermediate': return warning;
-      case 'Advanced': return success;
-      case 'Expert': return secondary;
-      default: return primary;
+      case 'Advanced':     return success;
+      case 'Expert':       return purple;
+      default:             return primary;
     }
   }
 
-  static Color proficiencyBgColor(String level) {
-    return proficiencyColor(level).withValues(alpha: 0.15);
+  static Color proficiencyBg(String level) =>
+      proficiencyColor(level).withValues(alpha: 0.12);
+
+  // Category icon colors (for icon circles)
+  static Color categoryIconColor(String category) {
+    switch (category.toLowerCase()) {
+      case 'freelance':         return info;
+      case 'open source':      return success;
+      case 'personal':         return purple;
+      case 'framework':        return info;
+      case 'programming language': return orange;
+      case 'backend':          return warning;
+      case 'database':         return danger;
+      case 'cloud & devops':   return teal;
+      case 'tool':             return textSecond;
+      default:                 return primary;
+    }
   }
+
+  static Color categoryIconBg(String category) =>
+      categoryIconColor(category).withValues(alpha: 0.12);
+
+  static const Color orange = Color(0xFFFF6B35);
+  static const Color teal   = Color(0xFF00897B);
 }
