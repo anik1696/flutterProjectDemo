@@ -3,394 +3,310 @@ import 'package:provider/provider.dart';
 import '../providers/project_provider.dart';
 import '../providers/skill_provider.dart';
 import '../providers/profile_provider.dart';
-import '../models/project.dart';
-import '../models/skill.dart';
 import '../utils/constants.dart';
+import '../app/theme.dart';
 import '../widgets/metric_card.dart';
 import '../widgets/project_card.dart';
 import '../widgets/skill_card.dart';
-import '../widgets/section_header.dart';
 import '../widgets/empty_state.dart';
 
-/// The Dashboard tab — the first screen users see after launch.
-///
-/// Shows a personalised welcome card, portfolio statistics, quick-action
-/// shortcuts, the three most-recent projects, and the top five skills by
-/// proficiency. All data is read from the Provider tree; no local state is
-/// required beyond what the providers hold.
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
-  // ── Time-of-day helpers ────────────────────────────────────────────────────
-
   String _greeting() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
+    final h = DateTime.now().hour;
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
     return 'Good evening';
   }
 
   String _motivationalMessage() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return kMorningMessages[0];
-    if (hour < 17) return kAfternoonMessages[0];
+    final h = DateTime.now().hour;
+    if (h < 12) return kMorningMessages[0];
+    if (h < 17) return kAfternoonMessages[0];
     return kEveningMessages[0];
   }
 
-  // ── Navigation helpers ─────────────────────────────────────────────────────
-
-  void _goToTab(BuildContext context, int tabIndex) {
-    Navigator.pushReplacementNamed(
-      context,
-      kRouteMain,
-      arguments: tabIndex,
-    );
-  }
-
-  // ── Build ──────────────────────────────────────────────────────────────────
+  void _goToTab(BuildContext context, int i) =>
+      Navigator.pushReplacementNamed(context, kRouteMain, arguments: i);
 
   @override
   Widget build(BuildContext context) {
     final profileProvider = context.watch<ProfileProvider>();
     final projectProvider = context.watch<ProjectProvider>();
     final skillProvider = context.watch<SkillProvider>();
-
-    final profile = profileProvider.profile;
-    final recentProjects = projectProvider.recentProjects;
-    final topSkills = skillProvider.topSkills;
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('CodeFolio Pro'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: 'Settings',
-            onPressed: () => Navigator.pushNamed(context, kRouteSettings),
-          ),
-        ],
-      ),
       body: RefreshIndicator(
         onRefresh: () async {
-          // Providers are already reactive; a lightweight reload is sufficient.
           await Future.wait([
             projectProvider.loadProjects(),
             skillProvider.loadSkills(),
             profileProvider.loadProfile(),
           ]);
         },
-        child: SingleChildScrollView(
+        child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // 1 — Welcome card
-              _buildWelcomeCard(context, profile, projectProvider, skillProvider),
-
-              const SizedBox(height: 20),
-
-              // 2 — Portfolio stats
-              const SectionHeader(title: 'Portfolio Stats'),
-              const SizedBox(height: 8),
-              _buildStats(context, projectProvider, skillProvider),
-
-              const SizedBox(height: 20),
-
-              // 3 — Quick actions
-              const SectionHeader(title: 'Quick Actions'),
-              const SizedBox(height: 8),
-              _buildQuickActions(context),
-
-              const SizedBox(height: 20),
-
-              // 4 — Recent projects
-              SectionHeader(
-                title: 'Recent Projects',
-                actionLabel: 'View All',
-                onAction: () => _goToTab(context, 1),
-              ),
-              const SizedBox(height: 8),
-              _buildRecentProjects(context, recentProjects),
-
-              const SizedBox(height: 20),
-
-              // 5 — Top skills
-              SectionHeader(
-                title: 'Top Skills',
-                actionLabel: 'View All',
-                onAction: () => _goToTab(context, 2),
-              ),
-              const SizedBox(height: 8),
-              _buildTopSkills(context, topSkills),
-
-              const SizedBox(height: 24),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ── Welcome card ───────────────────────────────────────────────────────────
-
-  Widget _buildWelcomeCard(
-    BuildContext context,
-    dynamic profile,
-    ProjectProvider projectProvider,
-    SkillProvider skillProvider,
-  ) {
-    final scheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final displayName = profile.name.isNotEmpty ? profile.name : 'Developer';
-
-    return Card(
-      elevation: 0,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [scheme.primary, scheme.tertiary],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${_greeting()}, $displayName 👋',
-              style: textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+          slivers: [
+            // ── Hero / Welcome SliverAppBar ─────────────────────────────────
+            SliverToBoxAdapter(
+              child: _HeroCard(
+                greeting: _greeting(),
+                message: _motivationalMessage(),
+                displayName: profileProvider.profile.name.isNotEmpty
+                    ? profileProvider.profile.name
+                    : 'Developer',
+                projectCount: projectProvider.totalProjects,
+                skillCount: skillProvider.totalSkills,
+                onSettings: () => Navigator.pushNamed(context, kRouteSettings),
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              _motivationalMessage(),
-              style: textTheme.bodyMedium?.copyWith(color: Colors.white70),
+
+            // ── Stats Bento ─────────────────────────────────────────────────
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+              sliver: SliverToBoxAdapter(
+                child: _SectionLabel(title: 'Portfolio Stats'),
+              ),
             ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                _WelcomeChip(
-                  label: '${projectProvider.totalProjects} Projects',
-                  icon: Icons.folder_rounded,
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+              sliver: SliverToBoxAdapter(
+                child: _BentoStats(
+                  projectProvider: projectProvider,
+                  skillProvider: skillProvider,
+                  onTap: (tab) => _goToTab(context, tab),
                 ),
-                const SizedBox(width: 8),
-                _WelcomeChip(
-                  label: '${skillProvider.totalSkills} Skills',
-                  icon: Icons.psychology_rounded,
-                ),
-              ],
+              ),
             ),
+
+            // ── Quick Actions ───────────────────────────────────────────────
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+              sliver: SliverToBoxAdapter(
+                child: _SectionLabel(title: 'Quick Actions'),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+              sliver: SliverToBoxAdapter(
+                child: _QuickActions(
+                  onAddProject: () =>
+                      Navigator.pushNamed(context, kRouteAddProject),
+                  onAddSkill: () => _goToTab(context, 2),
+                  onViewProjects: () => _goToTab(context, 1),
+                  onEditProfile: () => _goToTab(context, 3),
+                ),
+              ),
+            ),
+
+            // ── Recent Projects ─────────────────────────────────────────────
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+              sliver: SliverToBoxAdapter(
+                child: Row(
+                  children: [
+                    Expanded(child: _SectionLabel(title: 'Recent Projects')),
+                    TextButton(
+                      onPressed: () => _goToTab(context, 1),
+                      child: Text('View All',
+                          style: TextStyle(color: cs.primary, fontSize: 13)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (projectProvider.recentProjects.isEmpty)
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                sliver: SliverToBoxAdapter(
+                  child: EmptyState(
+                    icon: Icons.folder_open_rounded,
+                    title: 'No Projects Yet',
+                    message: 'Tap "Add Project" to start tracking your work.',
+                    actionLabel: 'Add Project',
+                    onAction: () =>
+                        Navigator.pushNamed(context, kRouteAddProject),
+                  ),
+                ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                sliver: SliverList.separated(
+                  itemCount: projectProvider.recentProjects.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  itemBuilder: (_, i) =>
+                      ProjectCard(project: projectProvider.recentProjects[i]),
+                ),
+              ),
+
+            // ── Top Skills ──────────────────────────────────────────────────
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+              sliver: SliverToBoxAdapter(
+                child: Row(
+                  children: [
+                    Expanded(child: _SectionLabel(title: 'Top Skills')),
+                    TextButton(
+                      onPressed: () => _goToTab(context, 2),
+                      child: Text('View All',
+                          style: TextStyle(color: cs.primary, fontSize: 13)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (skillProvider.topSkills.isEmpty)
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                sliver: SliverToBoxAdapter(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        'No skills added yet.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: cs.onSurfaceVariant,
+                            ),
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                sliver: SliverList.separated(
+                  itemCount: skillProvider.topSkills.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  itemBuilder: (_, i) =>
+                      SkillCard(skill: skillProvider.topSkills[i]),
+                ),
+              ),
           ],
         ),
       ),
     );
   }
+}
 
-  // ── Stats grid ─────────────────────────────────────────────────────────────
+// ── Hero Card ────────────────────────────────────────────────────────────────
+class _HeroCard extends StatelessWidget {
+  final String greeting;
+  final String message;
+  final String displayName;
+  final int projectCount;
+  final int skillCount;
+  final VoidCallback onSettings;
 
-  Widget _buildStats(
-    BuildContext context,
-    ProjectProvider projectProvider,
-    SkillProvider skillProvider,
-  ) {
-    final scheme = Theme.of(context).colorScheme;
+  const _HeroCard({
+    required this.greeting,
+    required this.message,
+    required this.displayName,
+    required this.projectCount,
+    required this.skillCount,
+    required this.onSettings,
+  });
 
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
-      childAspectRatio: 1.25,
-      children: [
-        MetricCard(
-          label: 'Total Projects',
-          value: '${projectProvider.totalProjects}',
-          icon: Icons.folder_rounded,
-          iconColor: scheme.primary,
-          onTap: () => _goToTab(context, 1),
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    final topPadding = MediaQuery.of(context).padding.top;
+
+    return Container(
+      padding: EdgeInsets.fromLTRB(20, topPadding + 16, 20, 24),
+      decoration: BoxDecoration(
+        gradient: AppTheme.heroGradient(Theme.of(context).colorScheme),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(28),
+          bottomRight: Radius.circular(28),
         ),
-        MetricCard(
-          label: 'Completed',
-          value: '${projectProvider.completedProjects}',
-          icon: Icons.check_circle_rounded,
-          iconColor: Colors.green,
-          onTap: () => _goToTab(context, 1),
-        ),
-        MetricCard(
-          label: 'In Progress',
-          value: '${projectProvider.inProgressProjects}',
-          icon: Icons.pending_rounded,
-          iconColor: Colors.orange,
-          onTap: () => _goToTab(context, 1),
-        ),
-        MetricCard(
-          label: 'Skills',
-          value: '${skillProvider.totalSkills}',
-          icon: Icons.psychology_rounded,
-          iconColor: scheme.tertiary,
-          onTap: () => _goToTab(context, 2),
-        ),
-      ],
-    );
-  }
-
-  // ── Quick actions grid ─────────────────────────────────────────────────────
-
-  Widget _buildQuickActions(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    final actions = [
-      (
-        icon: Icons.add_circle_outline_rounded,
-        label: 'Add Project',
-        color: scheme.primary,
-        onTap: () => Navigator.pushNamed(context, kRouteAddProject),
       ),
-      (
-        icon: Icons.psychology_outlined,
-        label: 'Add Skill',
-        color: scheme.tertiary,
-        onTap: () => _goToTab(context, 2),
-      ),
-      (
-        icon: Icons.folder_outlined,
-        label: 'View Projects',
-        color: Colors.orange,
-        onTap: () => _goToTab(context, 1),
-      ),
-      (
-        icon: Icons.edit_outlined,
-        label: 'Edit Profile',
-        color: Colors.green,
-        onTap: () => _goToTab(context, 3),
-      ),
-    ];
-
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
-      childAspectRatio: 1.8,
-      children: actions.map((action) {
-        return Card(
-          child: InkWell(
-            onTap: action.onTap,
-            borderRadius: BorderRadius.circular(16),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              child: Row(
-                children: [
-                  Icon(action.icon, color: action.color, size: 22),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      action.label,
-                      style: textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Settings icon row
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'CodeFolio Pro',
+                  style: tt.labelLarge?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
                   ),
-                ],
+                ),
               ),
+              IconButton(
+                icon: const Icon(Icons.settings_outlined,
+                    color: Colors.white, size: 22),
+                onPressed: onSettings,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '$greeting,',
+            style: tt.bodyLarge?.copyWith(
+              color: Colors.white.withValues(alpha: 0.8),
             ),
           ),
-        );
-      }).toList(),
-    );
-  }
-
-  // ── Recent projects ────────────────────────────────────────────────────────
-
-  Widget _buildRecentProjects(
-    BuildContext context,
-    List<Project> recentProjects,
-  ) {
-    if (recentProjects.isEmpty) {
-      return EmptyState(
-        icon: Icons.folder_open_rounded,
-        title: 'No Projects Yet',
-        message: 'Tap "Add Project" to start tracking your work.',
-        actionLabel: 'Add Project',
-        onAction: () => Navigator.pushNamed(context, kRouteAddProject),
-      );
-    }
-
-    return Column(
-      children: [
-        for (int i = 0; i < recentProjects.length; i++) ...[
-          ProjectCard(project: recentProjects[i]),
-          if (i < recentProjects.length - 1) const SizedBox(height: 12),
+          const SizedBox(height: 2),
+          Text(
+            displayName,
+            style: tt.headlineMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            message,
+            style: tt.bodySmall?.copyWith(
+              color: Colors.white.withValues(alpha: 0.75),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Quick stats pills
+          Row(
+            children: [
+              _HeroPill(icon: Icons.folder_rounded, label: '$projectCount Projects'),
+              const SizedBox(width: 10),
+              _HeroPill(icon: Icons.psychology_rounded, label: '$skillCount Skills'),
+            ],
+          ),
         ],
-      ],
-    );
-  }
-
-  // ── Top skills ─────────────────────────────────────────────────────────────
-
-  Widget _buildTopSkills(BuildContext context, List<Skill> topSkills) {
-    final textTheme = Theme.of(context).textTheme;
-    final scheme = Theme.of(context).colorScheme;
-
-    if (topSkills.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: Center(
-          child: Text(
-            'No skills added yet. Head to the Skills tab to get started!',
-            style: textTheme.bodyMedium?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
-    }
-
-    return Column(
-      children: topSkills.map((skill) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: SkillCard(skill: skill),
-        );
-      }).toList(),
+      ),
     );
   }
 }
 
-// ── Private helper widget ──────────────────────────────────────────────────
-
-/// A small chip displayed inside the welcome card to surface key stats.
-class _WelcomeChip extends StatelessWidget {
-  final String label;
+class _HeroPill extends StatelessWidget {
   final IconData icon;
+  final String label;
 
-  const _WelcomeChip({required this.label, required this.icon});
+  const _HeroPill({required this.icon, required this.label});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.20),
+        color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 14, color: Colors.white),
-          const SizedBox(width: 4),
+          const SizedBox(width: 6),
           Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -400,6 +316,232 @@ class _WelcomeChip extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ── Bento Stats ──────────────────────────────────────────────────────────────
+class _BentoStats extends StatelessWidget {
+  final ProjectProvider projectProvider;
+  final SkillProvider skillProvider;
+  final void Function(int tab) onTap;
+
+  const _BentoStats({
+    required this.projectProvider,
+    required this.skillProvider,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    // Use Row+Expanded instead of GridView to avoid aspect-ratio overflow
+    return IntrinsicHeight(
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 110,
+                  child: MetricCard(
+                    label: 'Total Projects',
+                    value: '${projectProvider.totalProjects}',
+                    icon: Icons.folder_rounded,
+                    iconColor: cs.primary,
+                    onTap: () => onTap(1),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SizedBox(
+                  height: 110,
+                  child: MetricCard(
+                    label: 'Completed',
+                    value: '${projectProvider.completedProjects}',
+                    icon: Icons.check_circle_rounded,
+                    iconColor: const Color(0xFF10B981),
+                    onTap: () => onTap(1),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 110,
+                  child: MetricCard(
+                    label: 'In Progress',
+                    value: '${projectProvider.inProgressProjects}',
+                    icon: Icons.pending_rounded,
+                    iconColor: const Color(0xFFF59E0B),
+                    onTap: () => onTap(1),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SizedBox(
+                  height: 110,
+                  child: MetricCard(
+                    label: 'Skills',
+                    value: '${skillProvider.totalSkills}',
+                    icon: Icons.psychology_rounded,
+                    iconColor: cs.tertiary,
+                    onTap: () => onTap(2),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Quick Actions ────────────────────────────────────────────────────────────
+class _QuickActions extends StatelessWidget {
+  final VoidCallback onAddProject;
+  final VoidCallback onAddSkill;
+  final VoidCallback onViewProjects;
+  final VoidCallback onEditProfile;
+
+  const _QuickActions({
+    required this.onAddProject,
+    required this.onAddSkill,
+    required this.onViewProjects,
+    required this.onEditProfile,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final actions = [
+      (icon: Icons.add_circle_outline_rounded, label: 'Add Project',
+        color: cs.primary, onTap: onAddProject),
+      (icon: Icons.psychology_outlined, label: 'Add Skill',
+        color: cs.tertiary, onTap: onAddSkill),
+      (icon: Icons.folder_outlined, label: 'View Projects',
+        color: const Color(0xFFF59E0B), onTap: onViewProjects),
+      (icon: Icons.edit_outlined, label: 'Edit Profile',
+        color: const Color(0xFF10B981), onTap: onEditProfile),
+    ];
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(child: _ActionTile(action: actions[0])),
+            const SizedBox(width: 12),
+            Expanded(child: _ActionTile(action: actions[1])),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(child: _ActionTile(action: actions[2])),
+            const SizedBox(width: 12),
+            Expanded(child: _ActionTile(action: actions[3])),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ActionTile extends StatelessWidget {
+  final ({IconData icon, String label, Color color, VoidCallback onTap}) action;
+
+  const _ActionTile({required this.action});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final isDark = cs.brightness == Brightness.dark;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: action.onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          height: 64,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: isDark ? const Color(0xFF16213E) : cs.surface,
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.07)
+                  : cs.outline.withValues(alpha: 0.1),
+            ),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: action.color.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(action.icon, size: 16, color: action.color),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  action.label,
+                  style: tt.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Section label ────────────────────────────────────────────────────────────
+class _SectionLabel extends StatelessWidget {
+  final String title;
+
+  const _SectionLabel({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Row(
+      children: [
+        Container(
+          width: 3,
+          height: 16,
+          decoration: BoxDecoration(
+            color: cs.primary,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: cs.onSurface,
+                letterSpacing: -0.2,
+              ),
+        ),
+      ],
     );
   }
 }

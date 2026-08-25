@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Displays a technology name as a small chip.
 class TechChip extends StatelessWidget {
   final String label;
   final bool selected;
@@ -19,7 +18,8 @@ class TechChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
+    final isDark = cs.brightness == Brightness.dark;
 
     if (onTap != null) {
       return FilterChip(
@@ -27,31 +27,62 @@ class TechChip extends StatelessWidget {
         selected: selected,
         onSelected: (_) => onTap!(),
         labelStyle: TextStyle(
-          fontSize: 12,
-          fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+          fontSize: 11,
+          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+          color: selected ? cs.primary : cs.onSurfaceVariant,
+        ),
+        backgroundColor: isDark
+            ? Colors.white.withValues(alpha: 0.06)
+            : cs.surfaceContainerHighest,
+        selectedColor: cs.primary.withValues(alpha: 0.12),
+        side: BorderSide(
+          color: selected
+              ? cs.primary.withValues(alpha: 0.4)
+              : cs.outline.withValues(alpha: 0.2),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 4),
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       );
     }
 
-    return Chip(
-      label: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          color: selected ? scheme.onPrimary : scheme.onSurfaceVariant,
-          fontWeight: FontWeight.w500,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: selected
+            ? cs.primary.withValues(alpha: 0.12)
+            : isDark
+                ? Colors.white.withValues(alpha: 0.06)
+                : cs.surfaceContainerHighest,
+        border: Border.all(
+          color: selected
+              ? cs.primary.withValues(alpha: 0.3)
+              : isDark
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : cs.outline.withValues(alpha: 0.2),
         ),
       ),
-      backgroundColor:
-          selected ? scheme.primary : scheme.surfaceContainerHighest,
-      side: BorderSide(color: scheme.outline.withOpacity(0.2)),
-      padding: const EdgeInsets.symmetric(horizontal: 2),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      onDeleted: showClose ? onClose : null,
-      deleteIcon: showClose
-          ? Icon(Icons.close_rounded, size: 14, color: scheme.onSurfaceVariant)
-          : null,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: selected ? cs.primary : cs.onSurfaceVariant,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          if (showClose && onClose != null) ...[
+            const SizedBox(width: 4),
+            GestureDetector(
+              onTap: onClose,
+              child: Icon(Icons.close_rounded,
+                  size: 12, color: cs.onSurfaceVariant),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

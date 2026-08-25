@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 import '../providers/profile_provider.dart';
@@ -77,73 +77,114 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              colorScheme.primary,
-              colorScheme.primaryContainer,
+              Color(0xFF0F0F1A),
+              Color(0xFF1A1A2E),
+              Color(0xFF16213E),
             ],
           ),
         ),
-        child: Center(
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: ScaleTransition(
-              scale: _scaleAnimation,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 104,
-                    height: 104,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.18),
-                          blurRadius: 24,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.code_rounded,
-                      size: 64,
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'CodeFolio Pro',
-                    style: textTheme.displaySmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Track. Build. Showcase.',
-                    style: textTheme.titleMedium?.copyWith(
-                      color: Colors.white70,
-                    ),
-                  ),
-                  const SizedBox(height: 48),
-                  const CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    strokeWidth: 2.5,
-                  ),
-                ],
+        child: Stack(
+          children: [
+            // Subtle background circles
+            Positioned(
+              top: -80,
+              left: -80,
+              child: Container(
+                width: 300,
+                height: 300,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFF4F46E5).withValues(alpha: 0.08),
+                ),
               ),
             ),
-          ),
+            Positioned(
+              bottom: -100,
+              right: -80,
+              child: Container(
+                width: 350,
+                height: 350,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFF06B6D4).withValues(alpha: 0.06),
+                ),
+              ),
+            ),
+            Center(
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: ScaleTransition(
+                  scale: _scaleAnimation,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Glowing logo container
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(28),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF4F46E5), Color(0xFF06B6D4)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF4F46E5).withValues(alpha: 0.5),
+                              blurRadius: 32,
+                              spreadRadius: 4,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.code_rounded,
+                          size: 54,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                      Text(
+                        'CodeFolio Pro',
+                        style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -1,
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Track. Build. Showcase.',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              color: Colors.white.withValues(alpha: 0.6),
+                              letterSpacing: 1.5,
+                            ),
+                      ),
+                      const SizedBox(height: 56),
+                      SizedBox(
+                        width: 28,
+                        height: 28,
+                        child: CircularProgressIndicator(
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                              Color(0xFF06B6D4)),
+                          strokeWidth: 2.5,
+                          backgroundColor:
+                              Colors.white.withValues(alpha: 0.1),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

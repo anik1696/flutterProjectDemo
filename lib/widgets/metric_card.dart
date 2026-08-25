@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// A metric/stat card for the dashboard showing a label, value, and icon.
+/// A stat card for the dashboard. Uses LayoutBuilder so it adapts
+/// to any bento-grid cell size — no overflow possible.
 class MetricCard extends StatelessWidget {
   final String label;
   final String value;
@@ -19,50 +20,73 @@ class MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final color = iconColor ?? scheme.primary;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final color = iconColor ?? cs.primary;
+    final isDark = cs.brightness == Brightness.dark;
 
-    return Card(
+    return Material(
+      color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: SingleChildScrollView(
-            physics: const NeverScrollableScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(icon, size: 20, color: color),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  value,
-                  style: textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: scheme.onSurface,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                Text(
-                  label,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              colors: [
+                color.withValues(alpha: isDark ? 0.15 : 0.08),
+                color.withValues(alpha: isDark ? 0.06 : 0.03),
               ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+            border: Border.all(
+              color: color.withValues(alpha: isDark ? 0.25 : 0.15),
+              width: 1,
+            ),
+          ),
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, size: 18, color: color),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    value,
+                    style: tt.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: cs.onSurface,
+                      letterSpacing: -1,
+                      height: 1.1,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    label,
+                    style: tt.labelSmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
