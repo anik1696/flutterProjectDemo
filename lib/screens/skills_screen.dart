@@ -130,11 +130,13 @@ class SkillsScreen extends StatelessWidget {
                     const SliverToBoxAdapter(child: SizedBox(height: 80)),
                   ],
                 ),
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => _showSkillDialog(context),
-            icon: const Icon(Icons.add_rounded),
-            label: const Text('Skill'),
-          ),
+          floatingActionButton: provider.skills.isEmpty
+              ? null
+              : FloatingActionButton.extended(
+                  onPressed: () => _showSkillDialog(context),
+                  icon: const Icon(Icons.add_rounded),
+                  label: const Text('Skill'),
+                ),
         );
       },
     );

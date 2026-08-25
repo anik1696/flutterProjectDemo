@@ -207,7 +207,7 @@ class DashboardScreen extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       crossAxisSpacing: 12,
       mainAxisSpacing: 12,
-      childAspectRatio: 1.4,
+      childAspectRatio: 1.25,
       children: [
         MetricCard(
           label: 'Total Projects',
@@ -280,7 +280,7 @@ class DashboardScreen extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       crossAxisSpacing: 12,
       mainAxisSpacing: 12,
-      childAspectRatio: 2.0,
+      childAspectRatio: 1.8,
       children: actions.map((action) {
         return Card(
           child: InkWell(

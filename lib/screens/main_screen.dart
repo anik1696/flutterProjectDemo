@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:codefolio_pro/screens/dashboard_screen.dart';
-import 'package:codefolio_pro/screens/projects_screen.dart';
-import 'package:codefolio_pro/screens/skills_screen.dart';
-import 'package:codefolio_pro/screens/profile_screen.dart';
+import 'dashboard_screen.dart';
+import 'projects_screen.dart';
+import 'skills_screen.dart';
+import 'profile_screen.dart';
 
 
 /// Main scaffold that hosts the four primary navigation tabs via a
