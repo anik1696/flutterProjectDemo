@@ -1,14 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
-/// A row widget that displays a section title on the left and an optional
-/// action link (e.g. "View All") on the right.
 class SectionHeader extends StatelessWidget {
   final String title;
-
-  /// Label for the trailing action button. When null, no button is shown.
   final String? actionLabel;
-
-  /// Callback for the trailing action button.
   final VoidCallback? onAction;
 
   const SectionHeader({
@@ -29,23 +23,24 @@ class SectionHeader extends StatelessWidget {
         Text(
           title,
           style: textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
             color: scheme.onSurface,
+            letterSpacing: -0.3,
           ),
         ),
         if (actionLabel != null && onAction != null)
           TextButton(
             onPressed: onAction,
             style: TextButton.styleFrom(
-              foregroundColor: scheme.primary,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              foregroundColor: scheme.onSurfaceVariant,
+              padding: const EdgeInsets.symmetric(horizontal: 0),
               visualDensity: VisualDensity.compact,
             ),
             child: Text(
               actionLabel!,
               style: textTheme.labelMedium?.copyWith(
-                color: scheme.primary,
-                fontWeight: FontWeight.w600,
+                color: scheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),

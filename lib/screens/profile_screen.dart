@@ -61,16 +61,15 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // ── Collapsible header ───────────────────────────────────────────
           SliverAppBar(
-            expandedHeight: 220,
+            expandedHeight: 180,
             pinned: true,
+            backgroundColor: scheme.surface,
             actions: [
               IconButton(
                 icon: const Icon(Icons.settings_outlined),
                 tooltip: 'Settings',
-                onPressed: () =>
-                    Navigator.pushNamed(context, kRouteSettings),
+                onPressed: () => Navigator.pushNamed(context, kRouteSettings),
               ),
               IconButton(
                 icon: const Icon(Icons.edit_outlined),
@@ -81,43 +80,35 @@ class ProfileScreen extends StatelessWidget {
             flexibleSpace: FlexibleSpaceBar(
               collapseMode: CollapseMode.parallax,
               background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [scheme.primary, scheme.tertiary],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
+                color: scheme.surface,
                 child: SafeArea(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       CircleAvatar(
-                        radius: 44,
-                        backgroundColor: Colors.white.withOpacity(0.25),
+                        radius: 40,
+                        backgroundColor: scheme.surfaceContainerHighest,
                         child: Text(
                           _initials(profile.name),
-                          style: textTheme.headlineMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                          style: textTheme.headlineSmall?.copyWith(
+                            color: scheme.onSurface,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        profile.name.isNotEmpty
-                            ? profile.name
-                            : 'Your Name',
-                        style: textTheme.titleLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                        profile.name.isNotEmpty ? profile.name : 'Your Name',
+                        style: textTheme.titleMedium?.copyWith(
+                          color: scheme.onSurface,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       if (profile.title.isNotEmpty)
                         Text(
                           profile.title,
-                          style: textTheme.titleSmall?.copyWith(
-                            color: Colors.white70,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
                           ),
                         ),
                     ],
