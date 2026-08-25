@@ -6,19 +6,18 @@ import 'local_storage_service.dart';
 class DataSeeder {
   static Future<void> seedIfNeeded() async {
     final storage = LocalStorageService();
-    
-    // Only seed if the profile hasn't been set up yet
-    if (storage.isProfileSetup()) return;
+    // Always re-seed profile to keep it up to date
+
 
     // 1. Seed Profile
     await storage.saveProfile(UserProfile(
-      name: 'Alex Developer',
-      title: 'Senior Mobile Engineer',
-      bio: 'Crafting high-performance, beautiful mobile experiences. Passionate about clean architecture and scalable systems.',
-      email: 'alex@example.com',
-      githubUsername: 'alexdev',
-      githubUrl: 'https://github.com/alexdev',
-      websiteUrl: 'https://alexdev.com',
+      name: 'Sahreyar Ahmed',
+      title: 'Flutter Developer',
+      bio: 'Passionate Flutter developer crafting high-performance, beautiful mobile experiences.',
+      email: 'sahreyar@example.com',
+      githubUsername: 'anik1696',
+      githubUrl: 'https://github.com/anik1696',
+      websiteUrl: 'https://sahreyar.dev',
       isProfileComplete: true,
     ));
 
